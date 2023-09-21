@@ -1,9 +1,8 @@
 // This is (some of) the code for the WebSession concept which was introduced in lecture on 9/18.
-// We're storing the user (in the form of the username string for now) when the user logs in, and we 
+// We're storing the user (in the form of the username string for now) when the user logs in, and we
 // reset the session's user when the user logs out.
 
 import { SessionData } from "express-session";
-import { UnauthenticatedError } from "./errors";
 
 export type WebSessionDoc = SessionData;
 
@@ -28,6 +27,10 @@ export default class WebSessionConcept {
     // Hint: Take a look at how the "end" function makes sure the user is logged in. Keep in mind that a
     // synchronization like starting a session should just consist of a series of actions that may throw
     // exceptions and should not have its own control flow.
+
+    if (this.isActive(session)) {
+      this.end(session);
+    }
     session.user = username;
   }
 
@@ -38,14 +41,17 @@ export default class WebSessionConcept {
 
   end(session: WebSessionDoc) {
     // We make sure the user is logged in before allowing the end action.
-    this.isActive(session);
-    session.user = undefined;
+    if (this.isActive(session)) {
+      session.user = undefined;
+    }
   }
 
   // Helper functions
   isActive(session: WebSessionDoc) {
     if (session.user === undefined) {
-      throw new UnauthenticatedError("Not logged in!");
+      // throw new UnauthenticatedError("Not logged in!");
+      return true;
     }
+    return false;
   }
 }
